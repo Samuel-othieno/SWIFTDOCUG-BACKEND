@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import 'dotenv/config'
 
 
 
@@ -8,7 +9,7 @@ function checkRequestForToken(req, res, next) {
     let token = authHeader.split(" ")[1];
 
     if (token) {
-      jwt.verify(token, "password-test", (err, decodedToken) => {
+      jwt.verify(token, process.env.JWT_SECRET, (err, decodedToken) => {
         if (err) {
           res.send("Failed to verify");
         } else {
