@@ -3,7 +3,8 @@ import Joi from "joi";
 const userSchema = Joi.object({
     username: Joi.string().min(3).max(40).alphanum().required(),
     password: Joi.string().pattern(new RegExp('^[a-zA-Z0-9]{3,30}$')),
-    email: Joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } })
+    email: Joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } }),
+    role: Joi.string().required()
 })
 
 const profileSchema = Joi.object({
@@ -30,10 +31,10 @@ const medicalRecordsSchema = Joi.object({
 
 
 function validate(schema) {
-    return (res, req, next) => {
+    return (req, res, next) => {
 
         if (typeof req.body !== 'object' || req.body === null) {
-            return res.status(400).json({error:'Request body is not an object or is undefined'});
+            return res.json({error:'Request body is not an object or is undefined'});
         }
 
 

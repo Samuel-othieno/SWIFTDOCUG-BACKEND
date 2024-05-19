@@ -16,7 +16,6 @@ App.use(cors())
 App.use(helmet())
 
 
-
 //! Request Handlers===========================================================================
 App.get('/', (req, res)=>{
     res.status(StatusCodes.OK).json({message: "Hello, Welcome to SwiftDocUg"})

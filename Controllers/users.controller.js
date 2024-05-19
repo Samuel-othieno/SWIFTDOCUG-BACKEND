@@ -1,8 +1,20 @@
 import { PrismaClient } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
+import jwt from 'jsonwebtoken';
+import checkRequestForToken from "../Utility-Functions/jwt.js";
 
 const prisma = new PrismaClient();
 
+// Token Generator====================================================================================================================================================
+function generateToken(req, res) {
+  let userData = {
+    id: "01",
+    name: "Samuel Othieno",
+    email: "douglasothieno@gmail.com",
+  };
+  let token = jwt.sign(userData, "password-test", { expiresIn: "1h" });
+  res.send(token);
+}
 
 //                                                                 *CREATE OPERATIONS*                                                                              //
 // Create A new patient ==============================================================================================================================================
@@ -13,15 +25,12 @@ async function createNewPatient(req, res) {
   try {
     const existingUser = await prisma.user.findFirst({
       where: {
-        OR: [
-          { email },
-          { username },
-        ],
+        OR: [{ email }, { username }],
       },
     });
 
     if (existingUser) {
-      const conflictField = existingUser.email === email ? 'Email' : 'Username';
+      const conflictField = existingUser.email === email ? "Email" : "Username";
       return res
         .status(StatusCodes.CONFLICT)
         .json({ message: `${conflictField} already in use` });
@@ -40,8 +49,6 @@ async function createNewPatient(req, res) {
   }
 }
 
-
-
 //                                                                 *FIND OPERATIONS*                                                                              //
 
 // FIND ONLY ONE PATIENT USING EMAIL AS A UNIQUE ATTRIBUTE. ========================================================================================================
@@ -51,11 +58,12 @@ async function findUniquePatient(req, res) {
   // Check if both username and email are missing and send a BAD_REQUEST response if so
   if (!username && !email) {
     return res.status(StatusCodes.BAD_REQUEST).json({
-      message: !username && !email
-        ? "Username or Email required"
-        : !username
-        ? "Username is required"
-        : "Email is required",
+      message:
+        !username && !email
+          ? "Username or Email required"
+          : !username
+          ? "Username is required"
+          : "Email is required",
     });
   }
 
@@ -68,7 +76,9 @@ async function findUniquePatient(req, res) {
 
     return !uniquePatientExists
       ? res.status(StatusCodes.NOT_FOUND).json({ message: "Patient not found" })
-      : res.status(StatusCodes.OK).json({ message: "SUCCESS! Patient found", uniquePatientExists });
+      : res
+          .status(StatusCodes.OK)
+          .json({ message: "SUCCESS! Patient found", uniquePatientExists });
   } catch (error) {
     console.error(error); // Log the error for debugging purposes
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -77,8 +87,6 @@ async function findUniquePatient(req, res) {
     });
   }
 }
-
-
 
 // Find all patient at a Time.😊==============================================================================================================================
 async function findPatients(req, res) {
@@ -108,9 +116,16 @@ async function updatePatientData(req, res) {
   } = req.body;
 
   // Check for missing fields
-  if (!newEmail || !newUsername || !newPassword || !oldEmail || !oldUsername || !oldPassword) {
+  if (
+    !newEmail ||
+    !newUsername ||
+    !newPassword ||
+    !oldEmail ||
+    !oldUsername ||
+    !oldPassword
+  ) {
     return res.status(StatusCodes.BAD_REQUEST).json({
-      error: "Fill in all the required fields to proceed.", 
+      error: "Fill in all the required fields to proceed.",
     });
   }
 
@@ -129,17 +144,17 @@ async function updatePatientData(req, res) {
     // Check for New Patient Data Conflicts
     const patientConflict = await prisma.user.findFirst({
       where: {
-        OR: [
-          { email: newEmail },
-          { username: newUsername },
-        ],
-        NOT: { id: oldPatientData.id }
+        OR: [{ email: newEmail }, { username: newUsername }],
+        NOT: { id: oldPatientData.id },
       },
     });
 
     if (patientConflict) {
-      const conflictError = patientConflict.email === newEmail ? "Email" : "Username";
-      return res.status(StatusCodes.BAD_REQUEST).json({ error: `${conflictError} already in use!` });
+      const conflictError =
+        patientConflict.email === newEmail ? "Email" : "Username";
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ error: `${conflictError} already in use!` });
     }
 
     if (newPassword === oldPassword) {
@@ -158,11 +173,10 @@ async function updatePatientData(req, res) {
       message: "SUCCESS! Patient data updated",
       updatedPatientData,
     });
-
   } catch (error) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       error: "Operation Failure!",
-      details: error.message
+      details: error.message,
     });
   }
 }
@@ -171,7 +185,7 @@ async function updatePatientData(req, res) {
 
 // Delete a Single User at a time=====================================================================================================================================
 async function deleteAPatient(req, res) {
-  const {email, username} = req.body;
+  const { email, username } = req.body;
 
   if (!email && !username) {
     return res.status(StatusCodes.BAD_REQUEST).json({
@@ -182,28 +196,24 @@ async function deleteAPatient(req, res) {
   try {
     const patientExists = await prisma.user.findFirst({
       where: {
-        OR:[
-          {email},
-          {username}          
-        ]
+        OR: [{ email }, { username }],
       },
     });
 
     if (!patientExists) {
       return res
         .status(StatusCodes.NOT_FOUND)
-        .json({ error: "Patient not found"});
-
+        .json({ error: "Patient not found" });
     } else {
       await prisma.user.delete({
         where: {
-          id: patientExists.id
-        }
+          id: patientExists.id,
+        },
       });
-      return res.status(StatusCodes.OK).json({ message: "SUCCESS! Patient deleted" });
+      return res
+        .status(StatusCodes.OK)
+        .json({ message: "SUCCESS! Patient deleted" });
     }
-
-
   } catch (error) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       error: "Operation failure! Please try again",
@@ -236,4 +246,5 @@ export {
   createNewPatient,
   deleteAllPatients,
   deleteAPatient,
+  generateToken
 };
