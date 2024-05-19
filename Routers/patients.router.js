@@ -1,7 +1,7 @@
 import express from "express";
 import checkRequestForToken from "../Utility-Functions/jwt.js";
 import {
-  generateToken,
+  userLogin,
   findPatients,
   findUniquePatient,
   updatePatientData,
@@ -14,7 +14,7 @@ import { validate, userSchema } from "../Utility-Functions/dataValidation.js";
 
 const patientRouter = express.Router();
 
-patientRouter.get('/token', generateToken)
+patientRouter.post('/login', userLogin)
 patientRouter.post('/patient/create', validate(userSchema), createNewPatient)
 patientRouter.get('/patient/one', findUniquePatient)
 patientRouter.get('/patient/all',checkRequestForToken, findPatients)

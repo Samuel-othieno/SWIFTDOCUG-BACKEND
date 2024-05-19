@@ -1,20 +1,59 @@
 import { PrismaClient } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
-import jwt from 'jsonwebtoken';
-import checkRequestForToken from "../Utility-Functions/jwt.js";
+import jwt from "jsonwebtoken";
+import "dotenv/config";
 
 const prisma = new PrismaClient();
 
-// Token Generator====================================================================================================================================================
-function generateToken(req, res) {
-  let userData = {
-    id: "01",
-    name: "Samuel Othieno",
-    email: "douglasothieno@gmail.com",
-  };
-  let token = jwt.sign(userData, "password-test", { expiresIn: "1h" });
-  res.send(token);
+// User Loginr====================================================================================================================================================
+async function userLogin(req, res) {
+  const { username, email, password } = req.body;
+
+  if ((!username && !email) || !password) {
+    const errorMessage = !username && !email ? "Username or Email" : "Password";
+    return res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ message: `${errorMessage} is missing` });
+  }
+
+  try {
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [{ email }, { username }],
+      },
+    });
+
+    if (!user) {
+      res
+        .status(StatusCodes.UNAUTHORIZED)
+        .json({ error: "Invalid credentials, Please try again" });
+    } 
+      
+    if (user.password === password) {
+        let userData = {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          role: user.role,
+        };
+        let token = jwt.sign(userData, process.env.JWT_SECRET, {
+          expiresIn: "1h",
+        });
+        res.status(StatusCodes.OK).json({message:"Success!", token});
+
+      } else {
+        res.status(StatusCodes.UNAUTHORIZED).json({
+          error: "Password or email is Incorrect",
+        });
+      }
+
+  }catch(error) {
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ error: "Operation failure! Please try again" });
+  }
 }
+
 
 //                                                                 *CREATE OPERATIONS*                                                                              //
 // Create A new patient ==============================================================================================================================================
@@ -246,5 +285,5 @@ export {
   createNewPatient,
   deleteAllPatients,
   deleteAPatient,
-  generateToken
+  userLogin,
 };
