@@ -8,12 +8,39 @@ const userSchema = Joi.object({
 })
 
 const profileSchema = Joi.object({
-    first_name: Joi.string().min(3).max(20).pattern(new RegExp('^[a-zA-Z0-9 ,.!;:\'\"-]+$')).required(),
-    last_name: Joi.string().min(3).max(20).alphanum().required(),
-    date_of_birth: Joi.date().less('now').required(),
-    nationality: Joi.string().min(3).max(50).pattern(new RegExp('^[a-zA-Z0-9 ,.!;:\'\"-]+$')).required(),
-    address: Joi.string().min(3).max(50).pattern(new RegExp('^[a-zA-Z0-9 ,.!;:\'\"-]+$')).required()
+    first_name: Joi.string().min(3).max(20).pattern(new RegExp('^[a-zA-Z0-9 ,.!;:\'\"-]+$')).required().messages({
+        'string.empty':'Please enter your first name',
+        'any.required' : 'Please enter your first name'
+    }),
+    
+    last_name: Joi.string().min(3).max(20).alphanum().required().messages({
+        'string.empty':'Please enter your last name',
+        'any.required' : 'Please enter your last name'
+    }),
 
+    date_of_birth: Joi.date().less('now').required().messages({
+        'date.base':'Please enter your date of birth',
+        'any.required' : 'Please enter your date of birth'
+    }),
+
+    nationality: Joi.string().min(3).max(50).pattern(new RegExp('^[a-zA-Z0-9 ,.!;:\'\"-]+$')).required().messages({
+        'string.empty':'Please enter your nationality',
+        'any.required' : 'Please enter your nationality'
+    }),
+
+    address: Joi.string().min(3).max(50).pattern(new RegExp('^[a-zA-Z0-9 ,.!;:\'\"-]+$')).required().messages({
+        'string.empty':'Please enter your address',
+        'any.required' : 'Please enter your address'
+    }),
+    
+    
+    gender: Joi.string().valid('MALE', 'FEMALE', 'PREFER_NOT_TO_SAY').required().messages({
+        'string.empty': 'Please select your gender',
+        'any.only': 'Please select a valid gender',
+        'any.required':'Please select your gender'
+    }),
+
+    userId: Joi.number().required()
 })
 
 const prescriptionsSchema = Joi.object({
@@ -31,6 +58,7 @@ const medicalRecordsSchema = Joi.object({
 
 
 function validate(schema) {
+
     return (req, res, next) => {
 
         if (typeof req.body !== 'object' || req.body === null) {
@@ -38,10 +66,14 @@ function validate(schema) {
         }
 
 
-        const result = schema.validate(req.body)
+        const {error} = schema.validate(req.body, {abortEarly: false});
 
-        if (result.error) {
-            return res.status(400).json(result.error)
+        if (error) {
+            const errors = error.details.map(err=>{
+                return {field: err.path[0], message: err.message};
+            })
+
+            return res.status(400).json(errors)
         } else {
             next()
         }
