@@ -15,7 +15,7 @@ async function userLogin(req, res) {
       .status(StatusCodes.BAD_REQUEST)
       .json({ message: `${errorMessage} is missing` });
   }
-
+;
   try {
     const user = await prisma.user.findFirst({
       where: {
