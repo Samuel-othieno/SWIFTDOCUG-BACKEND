@@ -3,6 +3,7 @@ import { StatusCodes } from "http-status-codes";
 import jwt from "jsonwebtoken";
 import "dotenv/config";
 
+
 const prisma = new PrismaClient();
 
 // User Loginr====================================================================================================================================================
@@ -59,7 +60,7 @@ async function userLogin(req, res) {
 // Create A new patient ==============================================================================================================================================
 
 async function createNewPatient(req, res) {
-  const { email, username } = req.body;
+  const { email, username, password, role, first_name, last_name, date_of_birth, nationality, address, gender,medication, duration, notes, medical_Conditions, immunizations, family_history, allergies } = req.body;
 
   try {
     const existingUser = await prisma.user.findFirst({
@@ -76,15 +77,51 @@ async function createNewPatient(req, res) {
     }
 
     const newPatient = await prisma.user.create({
-      data: req.body,
+      data: {
+        email,
+        username,
+        password,
+        role,
+        Profile:{
+          create:{
+            first_name,
+            last_name,
+            date_of_birth: new Date(),
+            nationality,
+            address,
+            gender,
+          }
+        },
+        Medical_records:{
+          create:{
+            allergies,
+            medical_Conditions,
+            immunizations,
+            family_history
+          }
+        },
+        Prescriptions:{
+          create:{
+            medication,
+            duration,
+            notes,
+          }
+        },
+      },
+      include:{
+        Medical_records: true,
+        Profile: true,
+        Prescriptions: true,
+      }
     });
+
     return res
       .status(StatusCodes.CREATED)
       .json({ message: "SUCCESS! New Patient added", newPatient });
   } catch (error) {
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ error: "Operation failure! Please try again" });
+      .json({ error: "Operation failure! Please try again", details: error.message});
   }
 }
 

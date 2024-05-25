@@ -5,7 +5,8 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["relationJoins"]
 }
 
 datasource db {
@@ -14,37 +15,26 @@ datasource db {
 }
 
 model User {
-  id                  Int               @id @default(autoincrement())
-  username            String            @unique
+  id                  Int              @id @default(autoincrement())
+  username            String           @unique
   password            String
-  email               String            @unique
-  role                Role              @default(PATIENT)
+  email               String           @unique
+  role                Role             @default(PATIENT)
   Profile             Profile?
   Medical_records     Medical_records?
-  doctorAppointments  Appointments[]    @relation(name: "DoctorAppointments")
-  patientAppointments Appointments[]    @relation(name: "PatientAppointments")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+  Prescriptions       Prescriptions[]
 }
 
 model Medical_records {
   id                 Int    @id @default(autoincrement())
   user               User   @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  userId             Int @unique
+  userId             Int    @unique
   allergies          String
   medical_Conditions String
   immunizations      String
   family_history     String
-}
-
-model Appointments {
-  id            Int             @id @default(autoincrement())
-  date          DateTime        @default(now())
-  doctorID      Int
-  patientID     Int
-  doctor        User            @relation(name: "DoctorAppointments", fields: [doctorID], references: [id], onDelete: Cascade)
-  patient       User            @relation(name: "PatientAppointments", fields: [patientID], references: [id])
-  Prescriptions Prescriptions[]
 }
 
 model Profile {
@@ -61,11 +51,11 @@ model Profile {
 
 model Prescriptions {
   id             Int          @id @default(autoincrement())
-  appointmentId  Appointments @relation(fields: [appointmentsId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   medication     String
   duration       String
   notes          String
-  appointmentsId Int
+  userId         Int
 }
 
 enum Role {
