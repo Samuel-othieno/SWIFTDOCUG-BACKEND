@@ -10,6 +10,7 @@ import {
   createNewPatient,
 } from "../Controllers/users.controller.js";
 import { validate, userSchema } from "../Utility-Functions/dataValidation.js";
+import {isDOCTOR, isPATIENT} from "../Utility-Functions/middleWare.js"
 
 
 const patientRouter = express.Router();
@@ -20,7 +21,7 @@ patientRouter.get('/patient/one', findUniquePatient)
 patientRouter.get('/patient/all',checkRequestForToken, findPatients)
 patientRouter.put('/patient/update', updatePatientData)
 patientRouter.delete('/patient/delete', deleteAPatient)
-patientRouter.delete('/patient/delete-all', deleteAllPatients)
+patientRouter.delete('/patient/delete-all', isDOCTOR,deleteAllPatients)
 
 
 export default patientRouter;

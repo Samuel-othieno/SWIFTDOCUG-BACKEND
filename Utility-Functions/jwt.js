@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import 'dotenv/config'
+import { StatusCodes } from 'http-status-codes';
 
 
 
@@ -11,7 +12,7 @@ function checkRequestForToken(req, res, next) {
     if (token) {
       jwt.verify(token, process.env.JWT_SECRET, (err, decodedToken) => {
         if (err) {
-          res.send("Failed to verify");
+          res.send("Failed to verify token, please try again😊");
         } else {
           req.tokenData= decodedToken
           next()
@@ -19,10 +20,10 @@ function checkRequestForToken(req, res, next) {
       });
 
     } else {
-      res.send("Absent");
+      res.status(StatusCodes.BAD_REQUEST).json({error:"Invalid token! Please try again to proceed"});
     }
   } else {
-    res.status(400).send("no");
+    res.status(400).send("Token required!");
   }
 }
 
