@@ -2,7 +2,8 @@ import { PrismaClient } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 import jwt from "jsonwebtoken";
 import "dotenv/config";
-
+import bcrypt from 'bcrypt'
+import { schema } from "../Utility-Functions/dataValidation.js";
 
 const prisma = new PrismaClient();
 
@@ -16,7 +17,6 @@ async function userLogin(req, res) {
       .status(StatusCodes.BAD_REQUEST)
       .json({ message: `${errorMessage} is missing` });
   }
-;
   try {
     const user = await prisma.user.findFirst({
       where: {
@@ -28,39 +28,63 @@ async function userLogin(req, res) {
       res
         .status(StatusCodes.UNAUTHORIZED)
         .json({ error: "Invalid credentials, Please try again" });
-    } 
-      
+    }
+
     if (user.password === password) {
-        let userData = {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          role: user.role,
-        };
-        let token = jwt.sign(userData, process.env.JWT_SECRET, {
-          expiresIn: "1h",
-        });
-        res.status(StatusCodes.OK).json({message:"Success!", token});
-
-      } else {
-        res.status(StatusCodes.UNAUTHORIZED).json({
-          error: "Password or email is Incorrect",
-        });
-      }
-
-  }catch(error) {
+      let userData = {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+      };
+      let token = jwt.sign(userData, process.env.JWT_SECRET, {
+        expiresIn: "1h",
+      });
+      res.status(StatusCodes.OK).json({ message: "Success!", token });
+    } else {
+      res.status(StatusCodes.UNAUTHORIZED).json({
+        error: "Password or email is Incorrect",
+      });
+    }
+  } catch (error) {
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
       .json({ error: "Operation failure! Please try again" });
   }
 }
 
-
 //                                                                 *CREATE OPERATIONS*                                                                              //
 // Create A new patient ==============================================================================================================================================
 
 async function createNewPatient(req, res) {
-  const { email, username, password, role, first_name, last_name, date_of_birth, nationality, address, gender,medication, duration, notes, medical_Conditions, immunizations, family_history, allergies } = req.body;
+
+  const {error, value} = schema.validate(req.body)
+
+  if(error){
+    return res.status(StatusCodes.BAD_REQUEST).json({message:error.details})
+  }
+
+
+  const saltRounds = 10;
+  const {
+    email,
+    username,
+    password,
+    role,
+    first_name,
+    last_name,
+    date_of_birth,
+    nationality,
+    address,
+    gender,
+    medication,
+    duration,
+    notes,
+    medical_Conditions,
+    immunizations,
+    family_history,
+    allergies,
+  } = value;
 
   try {
     const existingUser = await prisma.user.findFirst({
@@ -73,46 +97,48 @@ async function createNewPatient(req, res) {
       const conflictField = existingUser.email === email ? "Email" : "Username";
       return res
         .status(StatusCodes.CONFLICT)
-        .json({ message: `${conflictField} already in use` });
+        .json({ message: `${conflictField} already in use`});
     }
+
+    const hashedPassword = await bcrypt.hash(password, saltRounds)
 
     const newPatient = await prisma.user.create({
       data: {
         email,
         username,
-        password,
+        password: hashedPassword,
         role,
-        Profile:{
-          create:{
+        Profile: {
+          create: {
             first_name,
             last_name,
             date_of_birth: new Date(),
             nationality,
             address,
             gender,
-          }
+          },
         },
-        Medical_records:{
-          create:{
+        Medical_records: {
+          create: {
             allergies,
             medical_Conditions,
             immunizations,
-            family_history
-          }
+            family_history,
+          },
         },
-        Prescriptions:{
-          create:{
+        Prescriptions: {
+          create: {
             medication,
             duration,
             notes,
-          }
+          },
         },
       },
-      include:{
+      include: {
         Medical_records: true,
         Profile: true,
         Prescriptions: true,
-      }
+      },
     });
 
     return res
@@ -121,7 +147,10 @@ async function createNewPatient(req, res) {
   } catch (error) {
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ error: "Operation failure! Please try again", details: error.message});
+      .json({
+        error: "Operation failure! Please try again",
+        details: error.message,
+      });
   }
 }
 

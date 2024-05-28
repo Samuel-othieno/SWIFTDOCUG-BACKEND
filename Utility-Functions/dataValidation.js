@@ -36,9 +36,9 @@ const profileSchema = Joi.object({
     userId: Joi.number().required()
 })
 
-const userSchema = Joi.object({
+const schema = Joi.object({
     username: Joi.string().min(3).max(40).alphanum().required(),
-    password: Joi.string().pattern(new RegExp('^[a-zA-Z0-9]{3,30}$')),
+    password: Joi.string().min(8).pattern(new RegExp('^[a-zA-Z0-9]{3,30}$')),
     email: Joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } }),
     role: Joi.string().required(),
     first_name: Joi.string().min(3).max(20).pattern(new RegExp('^[a-zA-Z0-9 ,.!;:\'\"-]+$')).required().messages({
@@ -123,7 +123,7 @@ function validate(schema) {
 
 export {
     validate,
-    userSchema,
+    schema,
     profileSchema,
     prescriptionsSchema,
     medicalRecordsSchema
