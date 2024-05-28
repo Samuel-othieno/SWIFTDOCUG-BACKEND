@@ -14,13 +14,13 @@ App.use(express.json())
 App.use(cors())
 App.use(helmet())
 
-
 //! Request Handlers===========================================================================
 App.get('/', (req, res)=>{
     res.status(StatusCodes.OK).json({message: "Hello, Welcome to SwiftDocUg"})
 })
 
-App.use('/swiftdocug', patientRouter)
+App.use(patientRouter)
+
 
 App.listen(PORT,(req, res)=>{
     console.log(`Server is running on http://Localhost:${PORT}`)
