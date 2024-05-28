@@ -3,7 +3,7 @@ import { StatusCodes } from "http-status-codes";
 
 
 function isDOCTOR(req, res, next) {
-    if (req.tokenData.userRole==="DOCTOR") {
+    if (req.tokenData.userole === "DOCTOR") {
         next();
     } else {
         res.status(StatusCodes.FORBIDDEN).json({error:"Access Denied"})

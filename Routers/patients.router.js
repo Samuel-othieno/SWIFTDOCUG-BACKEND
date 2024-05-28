@@ -9,19 +9,20 @@ import {
   deleteAllPatients,
   createNewPatient,
 } from "../Controllers/users.controller.js";
-import { validate, userSchema } from "../Utility-Functions/dataValidation.js";
-import {isDOCTOR, isPATIENT} from "../Utility-Functions/middleWare.js"
+import { validate, schema} from "../Utility-Functions/dataValidation.js";
 
 
 const patientRouter = express.Router();
 
+
+
 patientRouter.post('/login', userLogin)
-patientRouter.post('/patient/create', validate(userSchema), createNewPatient)
-patientRouter.get('/patient/one', findUniquePatient)
-patientRouter.get('/patient/all',checkRequestForToken, findPatients)
-patientRouter.put('/patient/update', updatePatientData)
-patientRouter.delete('/patient/delete', deleteAPatient)
-patientRouter.delete('/patient/delete-all', isDOCTOR,deleteAllPatients)
+patientRouter.post('/create', validate(schema), createNewPatient)
+patientRouter.get('/find-one', findUniquePatient)
+patientRouter.get('/find-all',checkRequestForToken, findPatients)
+patientRouter.put('/update', updatePatientData)
+patientRouter.delete('/delete', deleteAPatient)
+patientRouter.delete('/delete-all', deleteAllPatients)
 
 
 export default patientRouter;
