@@ -53,7 +53,7 @@ async function userLogin(req, res) {
   }
 }
 
-//                                                                 *CREATE OPERATIONS*                                                                              //
+
 // Create A new patient ==============================================================================================================================================
 
 async function createNewPatient(req, res) {
