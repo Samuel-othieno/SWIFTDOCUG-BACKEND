@@ -7,7 +7,7 @@ import { schema } from "../Utility-Functions/dataValidation.js";
 
 const prisma = new PrismaClient();
 
-// User Loginr====================================================================================================================================================
+// User Login====================================================================================================================================================
 async function userLogin(req, res) {
   const { username, email, password } = req.body;
 
@@ -30,7 +30,7 @@ async function userLogin(req, res) {
         .json({ error: "Invalid credentials, Please try again" });
     }
 
-    if (user.password === password) {
+    if (bcrypt.compareSync(password, user.password)) {
       let userData = {
         id: user.id,
         username: user.username,
@@ -49,11 +49,11 @@ async function userLogin(req, res) {
   } catch (error) {
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ error: "Operation failure! Please try again" });
+      .json({ error: "Operation failure! Please try again", details:error.message });
   }
 }
 
-//                                                                 *CREATE OPERATIONS*                                                                              //
+
 // Create A new patient ==============================================================================================================================================
 
 async function createNewPatient(req, res) {
@@ -177,6 +177,11 @@ async function findUniquePatient(req, res) {
       where: {
         AND: [{ username }, { email }],
       },
+      include: {
+        Profile: true,
+        Medical_records: true,
+        Prescriptions: true,
+      }
     });
 
     return !uniquePatientExists
@@ -196,7 +201,13 @@ async function findUniquePatient(req, res) {
 // Find all patient at a Time.😊==============================================================================================================================
 async function findPatients(req, res) {
   try {
-    const Patient = await prisma.user.findMany();
+    const Patient = await prisma.user.findMany({      
+      include: {
+        Profile: true,
+        Medical_records: true,
+        Prescriptions: true,
+      }
+    });
     res
       .status(StatusCodes.ACCEPTED)
       .json({ message: "SUCCESS! Patients found", Patient });
