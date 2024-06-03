@@ -214,7 +214,7 @@ async function findPatients(req, res) {
   } catch (error) {
     res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ error: "Operation failure! Please try again" });
+      .json({ error: "Operation failure! Please try again", details: error.message});
   }
 }
 
