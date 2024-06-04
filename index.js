@@ -1,4 +1,5 @@
 import express from 'express';
+import 'dotenv/config'; 
 import morgan from 'morgan';
 import {StatusCodes} from 'http-status-codes';
 import helmet from "helmet";
@@ -6,7 +7,7 @@ import cors from 'cors';
 import patientRouter from './Routers/patients.router.js';
 
 const App = express()
-const PORT = 5000;
+const PORT = process.env.PORT || 4000;
 
 //! Middleware=================================================================================
 App.use(morgan('dev'))
