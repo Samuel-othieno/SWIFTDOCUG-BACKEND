@@ -49,7 +49,7 @@ async function userLogin(req, res) {
   } catch (error) {
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ error: "Operation failure! Please try again", details:error.message });
+      .json({ error: "Operation failure! Please try again", details: error.message });
   }
 }
 
@@ -58,10 +58,10 @@ async function userLogin(req, res) {
 
 async function createNewPatient(req, res) {
 
-  const {error, value} = schema.validate(req.body)
+  const { error, value } = schema.validate(req.body)
 
-  if(error){
-    return res.status(StatusCodes.BAD_REQUEST).json({message:error.details})
+  if (error) {
+    return res.status(StatusCodes.BAD_REQUEST).json({ message: error.details })
   }
 
 
@@ -97,7 +97,7 @@ async function createNewPatient(req, res) {
       const conflictField = existingUser.email === email ? "Email" : "Username";
       return res
         .status(StatusCodes.CONFLICT)
-        .json({ message: `${conflictField} already in use`});
+        .json({ message: `${conflictField} already in use` });
     }
 
     const hashedPassword = await bcrypt.hash(password, saltRounds)
@@ -167,8 +167,8 @@ async function findUniquePatient(req, res) {
         !username && !email
           ? "Username or Email required"
           : !username
-          ? "Username is required"
-          : "Email is required",
+            ? "Username is required"
+            : "Email is required",
     });
   }
 
@@ -187,8 +187,8 @@ async function findUniquePatient(req, res) {
     return !uniquePatientExists
       ? res.status(StatusCodes.NOT_FOUND).json({ message: "Patient not found" })
       : res
-          .status(StatusCodes.OK)
-          .json({ message: "SUCCESS! Patient found", uniquePatientExists });
+        .status(StatusCodes.OK)
+        .json({ message: "SUCCESS! Patient found", uniquePatientExists });
   } catch (error) {
     console.error(error); // Log the error for debugging purposes
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -201,7 +201,7 @@ async function findUniquePatient(req, res) {
 // Find all patient at a Time.😊==============================================================================================================================
 async function findPatients(req, res) {
   try {
-    const Patient = await prisma.user.findMany({      
+    const Patient = await prisma.user.findMany({
       include: {
         Profile: true,
         Medical_records: true,
@@ -214,7 +214,7 @@ async function findPatients(req, res) {
   } catch (error) {
     res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ error: "Operation failure! Please try again", details: error.message});
+      .json({ error: "Operation failure! Please try again", details: error.message });
   }
 }
 
