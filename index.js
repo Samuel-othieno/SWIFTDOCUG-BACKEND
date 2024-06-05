@@ -8,9 +8,10 @@ import cors from 'cors';
 import patientRouter from './Routers/patients.router.js';
 
 const App = express()
-const host_phrase = process.env.host_phrase;
+const host_phrase = process.env.HOST_PHRASE;
 const PORT = process.env.PORT;
 const host = process.env.HOST;
+
 
 //! Middleware=================================================================================
 App.use(morgan('dev'))
