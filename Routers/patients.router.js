@@ -12,6 +12,7 @@ import {
 
 import { validate, schema } from "../Utility-Functions/dataValidation.js";
 
+
 const patientRouter = express.Router();
 
 patientRouter.post("/login", userLogin);

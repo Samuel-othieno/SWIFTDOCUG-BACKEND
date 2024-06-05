@@ -6,6 +6,7 @@ import { StatusCodes } from 'http-status-codes';
 
 function checkRequestForToken(req, res, next) {
   if (req.headers.authorization) {
+   
     let authHeader = req.headers.authorization;
     let token = authHeader.split(" ")[1];
 
@@ -25,6 +26,7 @@ function checkRequestForToken(req, res, next) {
   } else {
     res.status(400).send("Token required!");
   }
-}
+} 
+
 
 export default checkRequestForToken;
