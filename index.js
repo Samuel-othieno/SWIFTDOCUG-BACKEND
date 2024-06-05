@@ -1,4 +1,5 @@
 import express from 'express';
+import 'dotenv/config'; 
 import morgan from 'morgan';
 import 'dotenv/config';
 import { StatusCodes } from 'http-status-codes';
